@@ -60,7 +60,7 @@ def send():  # event is passed by binders.
     # msg = my_msg.get()
     # name = input("name: ")
     # client_socket.send(bytes(name, "utf8"))
-    
+    global clients    
     pygame.init()
     maxSnakeLength = 1
     gray = (30, 30, 30)
@@ -124,9 +124,7 @@ def send():  # event is passed by binders.
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
-                        print("Pressed P ", intro)
                         intro = False
-                        print(intro)
                     if event.key == pygame.K_q:
                         pygame.quit()
                         quit()
@@ -189,9 +187,14 @@ def send():  # event is passed by binders.
         else:
             dummy = snakeBody.pop()
             snakeBody.appendleft((x,y))
-        
-        for center in snakeBody:
-            pygame.draw.circle(window, (30,200,30), [round(center[0]), round(center[1])], radius)
+        for player in clients:
+
+            body = pickle.loads(clients[player][2])
+            print(body)
+            for points in body:
+                pygame.draw.circle(window,(30,200,30), [round(player[0]), round(player[1])], radius)
+        #for center in snakeBody:
+        #    pygame.draw.circle(window, (30,200,30), [round(center[0]), round(center[1])], radius)
         window.blit(rotimage, rect)
         pygame.display.update()
         clock.tick(60)
