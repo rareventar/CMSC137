@@ -7,6 +7,8 @@ import pickle
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from collections import deque
+from client import createChatClient
+import multiprocessing 
 def receive():
     global foodSpawnQueue
     global clients
@@ -70,8 +72,8 @@ def send():  # event is passed by binders.
     white = (255,255,255)
     black = (0,0,0)
 
-    x = windowWidth * 0.5
-    y = windowHeight * 0.5
+    x = windowWidth * 0.75
+    y = windowHeight * 0.75
     snakeBody = deque()
     snakeList = pickle.dumps(snakeBody)
     smallFont = pygame.font.SysFont("arial", 25)
@@ -231,6 +233,7 @@ windowWidth, windowHeight = (750, 450)
 client_socket = socket(AF_INET, SOCK_STREAM)
 client_socket.connect(ADDR)
 
-
 send_thread = Thread(target = send)
 send_thread.start()
+#multiprocessing.Process(target = createChatClient(HOST, PORT+2000)).start()
+Thread(target = createChatClient(HOST, PORT+2000)).start()

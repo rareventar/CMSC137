@@ -1,24 +1,30 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 
-
+clients = {}
+addresses = {}
+SERVER = None
 def accept_incoming_connections():
+    global SERVER,addresses, clients
     """Sets up handling for incoming clients."""
     while True:
         client, client_address = SERVER.accept()
         print("%s:%s has connected." % client_address)
-        client.send(bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
+        client.send(bytes("Greetings from the cave! Now type your name and press enter!\n", "utf8"))
         addresses[client] = client_address
         Thread(target=handle_client, args=(client,)).start()
 
 
 def handle_client(client):  # Takes client socket as argument.
+    global clients
     """Handles a single client connection."""
+    BUFSIZ = 1024
 
     name = client.recv(BUFSIZ).decode("utf8")
-    welcome = 'Welcome %s! If you ever want to quit, type q to exit.' % name
+    name = name.strip()
+    welcome = 'Welcome %s! If you ever want to quit, type q to exit. \n' % name
     client.send(bytes(welcome, "utf8"))
-    msg = "%s has joined the chat!" % name
+    msg = "%s has joined the chat!\n" % name
     broadcast(bytes(msg, "utf8"))
     clients[client] = name
 
@@ -30,7 +36,7 @@ def handle_client(client):  # Takes client socket as argument.
             client.send(bytes("q", "utf8"))
             client.close()
             del clients[client]
-            broadcast(bytes("%s has left the chat." % name, "utf8"))
+            broadcast(bytes("%s has left the chat.\n" % name, "utf8"))
             break
 
 
@@ -41,21 +47,20 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
         sock.send(bytes(prefix, "utf8")+msg)
 
 
-clients = {}
-addresses = {}
-
-HOST = ''
-PORT = 33000
-BUFSIZ = 1024
-ADDR = (HOST, PORT)
-
-SERVER = socket(AF_INET, SOCK_STREAM)
-SERVER.bind(ADDR)
-
-if __name__ == "__main__":
+def createChatServer(HOST, PORT):
+    global SERVER
+    BUFSIZ = 1024
+    ADDR = ('localhost', PORT)
+    
+    SERVER = socket(AF_INET, SOCK_STREAM)
+    SERVER.bind(ADDR)
     SERVER.listen(5)
-    print("Waiting for connection...")
-    ACCEPT_THREAD = Thread(target=accept_incoming_connections)
+    print("Chat waiting for connection...")
+    ACCEPT_THREAD = Thread(target=accept_incoming_connections, daemon=True)
     ACCEPT_THREAD.start()
+    print('block2')
     ACCEPT_THREAD.join()
+    print('block3')
     SERVER.close()
+    print('block4')
+    return

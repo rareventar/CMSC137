@@ -6,8 +6,8 @@ import json
 import time
 import random
 from collections import deque
-
-
+from server import createChatServer
+import multiprocessing
 
 def accept_incoming_connections():
     while True:
@@ -96,27 +96,37 @@ def broadcast(msg):  # prefix is for name identification.
     for sock in clientsAddress:
         sock.sendall(msg)
 
+def cserverThread():
+    global HOST, PORT
+    #    multiprocessing.Process(target = createChatServer(HOST,PORT+2000)).start()
+    Thread(target = createChatServer(HOST,PORT+2000)).start()
+
 clientsAddress = {}
 clientsPosition = {}
 addresses = {}
 count  = 0
 
 HOST = ''
-PORT = 51000
+PORT = 35000
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
+Thread(target = cserverThread).start()
+print("ASDDDD")
 windowWidth, windowHeight = (750, 450)
 foodSize = 30
 foodSpawnQueue = []
+print("!!@###")
 SERVER = socket(AF_INET, SOCK_STREAM)
 SERVER.bind(ADDR)
+print(1233122)
 # foodSpawn()
-if __name__ == "__main__":
-    SERVER.listen(5)
-    print("Waiting for connection...")
-    ACCEPT_THREAD = Thread(target=accept_incoming_connections)
-    food_something = Thread(target=foodSpawn)
-    food_something.start()
-    ACCEPT_THREAD.start()
-    ACCEPT_THREAD.join()
-    SERVER.close()
+#if __name__ == "__main__":
+SERVER.listen(5)
+print("Game Waiting for connection...")
+ACCEPT_THREAD = Thread(target=accept_incoming_connections)
+food_something = Thread(target=foodSpawn)
+food_something.start()
+ACCEPT_THREAD.start()
+print('game thread start')
+ACCEPT_THREAD.join()
+SERVER.close()
