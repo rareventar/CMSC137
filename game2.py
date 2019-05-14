@@ -17,9 +17,9 @@ def receive():
             # msg_list.insert(tkinter.END, msg)
             clients.clear()
             clients = pickle.loads(msg).copy()
+            # print(pickle.loads(msg))
             msg = pickle.loads(msg)
-            foodSpawnQueue = pickle.loads(msg[count][3])
-            # print(pickle.loads(msg[count][3]))
+            foodSpawnQueue = pickle.loads(msg[count][2])
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -84,7 +84,7 @@ def send():  # event is passed by binders.
 
     foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
 
-    data = [x,y,snakeList, foodSpawnQueuePacket]
+    data = ["2", x,y,snakeList, foodSpawnQueuePacket]
     data = pickle.dumps(data)
     client_socket.send(bytes(data))
     count = int(client_socket.recv(BUFSIZ).decode("utf8"))
@@ -131,6 +131,10 @@ def send():  # event is passed by binders.
         #remove/eat food
         if ate:
             foodSpawnQueue.remove(eaten)
+            # eaten = pickle.dumps(eaten)
+            data = ["1", eaten]
+            data = pickle.dumps(data)
+            client_socket.send(bytes(data))
 
         if len(snakeBody) < maxSnakeLength:
             snakeBody.appendleft((x,y))
@@ -142,10 +146,10 @@ def send():  # event is passed by binders.
             pygame.draw.circle(window, (30,200,30), [round(center[0]), round(center[1])], radius)
         window.blit(rotimage, rect)
         pygame.display.update()
-        # clock.tick(60)
+        clock.tick(60)
         snakeList = pickle.dumps(snakeBody)
         foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
-        data = [x,y,snakeList,foodSpawnQueuePacket]
+        data = ["0", x,y,snakeList,foodSpawnQueuePacket]
         data = pickle.dumps(data)
         client_socket.send(bytes(data))
 
