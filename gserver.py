@@ -29,7 +29,9 @@ def handle_client(client):  # Takes client socket as argument.
         if msg != bytes("q", "utf8"):
             msg = pickle.loads(msg)
             # print(msg.values())
-            clientsPosition[strClient] = msg
+            clientsAddress[client] = msg
+            for a in clientsPosition:
+                clientsPosition[a] = msg
             broadcastall(pickle.dumps(clientsPosition))
         else:
             client.send(bytes("q", "utf8"))
