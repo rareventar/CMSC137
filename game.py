@@ -20,6 +20,10 @@ food = pygame.image.load('food.png')
 food = pygame.transform.scale(food, (32, 32))
 foodSize = 30
 
+smallFont = pygame.font.SysFont("arial", 25)
+medFont = pygame.font.SysFont("arial", 50)
+largeFont = pygame.font.SysFont("arial", 80)
+
 maxSnakeLength = 0
 radius = 10
 alive = True
@@ -36,6 +40,20 @@ def spawnFood():
 def getAngle(x1,y1, x2,y2):
     angle = math.degrees(math.atan2(y2-y1,x2-x1))
     return angle
+
+def text_objects(text, color, size):
+    if size == "small":
+        text_surface = smallFont.render(text, True, color)
+    elif size == "medium":
+        text_surface = medFont.render(text, True, color)
+    elif size == "large":
+        text_surface = largeFont.render(text, True, color)
+    return text_surface, text_surface.get_rect()
+
+def screenText(msg, color, y_displace=0, size="small"):
+    text_surf, text_rect = text_objects(msg, color, size)
+    text_rect.center = (windowWidth / 2), (windowHeight / 2) + y_displace
+    window.blit(text_surf, text_rect)
 
 def rotate(x, y, mousePos, image):
     angle = getAngle(x, y, mousePos[0], mousePos[1])
@@ -57,6 +75,32 @@ def translate(x, y, mousePos, boosted):
     return newX, newY
 
 def gameloop():
+    intro = True    
+    green = (0,200,0)
+    white = (255,255,255)
+    black = (0,0,0)
+
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_c:
+                    intro = False
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    quit()
+
+        window.fill(white)
+        screenText("Welcome to Slither", green, -100, "large")
+        screenText("The objective of the game is to the blue orbs",black, -30)
+        screenText("The more apples you eat, the longer you get", black,10)
+        screenText("If you run into other snakes or the edges, you die!",black, 50)
+        screenText("Press C to play, P to pause, or Q to quit.", black,180)
+        pygame.display.update()
+
     x = windowWidth * 0.5
     y = windowHeight * 0.5
 
@@ -64,7 +108,7 @@ def gameloop():
     maxSnakeLength = 1
 
     threading.Thread(target=spawnFood, daemon=True).start()
-
+    
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
