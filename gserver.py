@@ -66,7 +66,8 @@ def handle_client(client):  # Takes client socket as argument.
             broadcastall(pickle.dumps(clientsPosition))
         elif msg[0] == "1":
             # thing  = pickle.loads(msg[1])
-            foodSpawnQueue.remove(msg[1])
+            if msg[1] in foodSpawnQueue:
+                foodSpawnQueue.remove(msg[1])
         elif msg[0] == "2":
             foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
             msg[3] = foodSpawnQueuePacket
