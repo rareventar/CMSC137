@@ -46,15 +46,14 @@ def handle_client(client):  # Takes client socket as argument.
     while True:
         msg = client.recv(BUFSIZ)
         msg = pickle.loads(msg)
-
         if msg[0] == "0":
             foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
             msg[4] = foodSpawnQueuePacket
-            msg.pop(0)
+            # msg.pop(0)
             x = deque(msg)
             x.popleft()
             y = list(x)
-            # print(y)
+            # print(msg)
 
             clientsAddress[client] = y
             temp = 0
@@ -95,7 +94,7 @@ def broadcastall(msg):
 def broadcast(msg):  # prefix is for name identification.
     global clientsAddress
     for sock in clientsAddress:
-        sock.send(msg)
+        sock.sendall(msg)
 
 clientsAddress = {}
 clientsPosition = {}
@@ -103,7 +102,7 @@ addresses = {}
 count  = 0
 
 HOST = ''
-PORT = 37000
+PORT = 51000
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 windowWidth, windowHeight = (750, 450)

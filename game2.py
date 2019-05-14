@@ -16,10 +16,12 @@ def receive():
             msg = client_socket.recv(BUFSIZ)
             # msg_list.insert(tkinter.END, msg)
             clients.clear()
-            clients = pickle.loads(msg).copy()
+            msg  = pickle.loads(msg)
+            clients = msg.copy()
             # print(pickle.loads(msg))
-            msg = pickle.loads(msg)
-            foodSpawnQueue = pickle.loads(msg[count][2])
+            # for a in clients:
+            # msg = pickle.loads(msg)
+            foodSpawnQueue = pickle.loads(msg[count][3])
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -60,7 +62,7 @@ def send():  # event is passed by binders.
     # msg = my_msg.get()
     # name = input("name: ")
     # client_socket.send(bytes(name, "utf8"))
-    global clients    
+    global clients
     pygame.init()
     maxSnakeLength = 1
     gray = (30, 30, 30)
@@ -84,7 +86,7 @@ def send():  # event is passed by binders.
     window = pygame.display.set_mode((windowWidth, windowHeight))
 
     clock = pygame.time.Clock()
-    
+
     def text_objects(text, color, size):
         if size == "small":
             text_surface = smallFont.render(text, True, color)
@@ -98,7 +100,7 @@ def send():  # event is passed by binders.
         text_surf, text_rect = text_objects(msg, color, size)
         text_rect.center = (windowWidth / 2), (windowHeight / 2) + y_displace
         window.blit(text_surf, text_rect)
-    
+
     snakehead = pygame.image.load('Slither_snakehead.png')
     snakehead = pygame.transform.scale(snakehead, (40,40))
     food = pygame.image.load('food.png')
@@ -166,7 +168,7 @@ def send():  # event is passed by binders.
         if len(foodSpawnQueue) != 0:
             for foodItem in foodSpawnQueue:
                 window.blit(food, foodItem)
-        
+
         #check if snake collided with food
         ate = False
         for foodItem in foodSpawnQueue:
@@ -187,12 +189,15 @@ def send():  # event is passed by binders.
         else:
             dummy = snakeBody.pop()
             snakeBody.appendleft((x,y))
-        for player in clients:
-
-            body = pickle.loads(clients[player][2])
-            print(body)
+        localClients = clients.copy()
+        for player in localClients:
+            # print(localClients[player][2])
+            if type(localClients[player][2]) is float:
+                body = pickle.loads(localClients[player][3])
+            else:
+                body = pickle.loads(localClients[player][2])
             for points in body:
-                pygame.draw.circle(window,(30,200,30), [round(player[0]), round(player[1])], radius)
+                pygame.draw.circle(window,(30,200,30), [round(localClients[player][0]), round(localClients[player][1])], radius)
         #for center in snakeBody:
         #    pygame.draw.circle(window, (30,200,30), [round(center[0]), round(center[1])], radius)
         window.blit(rotimage, rect)
