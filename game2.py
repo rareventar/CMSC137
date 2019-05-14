@@ -8,13 +8,16 @@ from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from collections import deque
 def receive():
+    global clients
     """Handles receiving of messages."""
     while True:
         try:
             msg = client_socket.recv(BUFSIZ)
             # msg_list.insert(tkinter.END, msg)
-            # global clients = pickle.loads(msg)
-            print(msg)
+            clients.clear()
+            clients = pickle.loads(msg).copy()
+            msg = pickle.loads(msg)
+            print(msg[count])
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -43,15 +46,15 @@ def translate(x, y, mousePos, boosted):
 
 def spawnFood():
     while alive:
-        msg = "spawnFood"
-        client_socket.send(bytes(msg, "utf8"))
-        msg = client_socket.recv(BUFSIZ).decode("utf8")
-        # print(msg)
-        msg = msg.split()
-        foodX = int(msg[0])
-        foodY = int(msg[1])
-        # foodX = random.randrange(foodSize, windowWidth-foodSize)
-        # foodY = random.randrange(foodSize, windowHeight-foodSize)
+        # msg = "spawnFood"
+        # client_socket.send(bytes(msg, "utf8"))
+        # msg = client_socket.recv(BUFSIZ).decode("utf8")
+        # # print(msg)
+        # msg = msg.split()
+        # foodX = int(msg[0])
+        # foodY = int(msg[1])
+        foodX = random.randrange(foodSize, windowWidth-foodSize)
+        foodY = random.randrange(foodSize, windowHeight-foodSize)
         foodSpawnQueue.append([foodX, foodY, foodSize, foodSize])
         #window.blit(food, [foodX, foodY, foodSize, foodSize])
         #pygame.display.update()
@@ -67,13 +70,10 @@ def send():  # event is passed by binders.
     maxSnakeLength = 1
     gray = (30, 30, 30)
 
-    windowWidth, windowHeight = (750, 450)
-
     x = windowWidth * 0.5
     y = windowHeight * 0.5
     snakeBody = deque()
-    snakeList = tuple(snakeBody)
-    hashable = hash(snakeList)
+    snakeList = pickle.dumps(snakeBody)
 
     radius = 10
     connection = True
@@ -87,14 +87,17 @@ def send():  # event is passed by binders.
     food = pygame.image.load('food.png')
     food = pygame.transform.scale(food, (32, 32))
 
+    foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
 
-    data = {x,y,hashable}
+    data = {x,y,snakeList, foodSpawnQueuePacket}
     data = pickle.dumps(data)
     client_socket.send(bytes(data))
     count = int(client_socket.recv(BUFSIZ).decode("utf8"))
     threading.Thread(target=spawnFood, daemon=True).start()
     receive_thread = Thread(target=receive)
     receive_thread.start()
+
+
     while connection:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -144,10 +147,11 @@ def send():  # event is passed by binders.
         window.blit(rotimage, rect)
         pygame.display.update()
         clock.tick(60)
-        snakeList = tuple(snakeBody)
+        snakeList = pickle.dumps(snakeBody)
+        foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
         # print(snakeList)
-        hashable = hash(snakeList)
-        data = {x,y,hashable}
+        # hashable = hash(snakeList)
+        data = {x,y,snakeList,foodSpawnQueuePacket}
         data = pickle.dumps(data)
         client_socket.send(bytes(data))
 
@@ -166,10 +170,9 @@ ADDR = (HOST, PORT)
 alive = True
 foodSpawnQueue = []
 foodSize = 30
-count = -1
+count = 0
 clients = {}
-
-
+windowWidth, windowHeight = (750, 450)
 
 client_socket = socket(AF_INET, SOCK_STREAM)
 client_socket.connect(ADDR)

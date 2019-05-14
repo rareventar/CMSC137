@@ -2,6 +2,7 @@ from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import pickle
 import random
+import json
 
 def accept_incoming_connections():
     while True:
@@ -14,44 +15,47 @@ def accept_incoming_connections():
 
 def handle_client(client):  # Takes client socket as argument.
     global count
+    # print(client)
+    strClient = str(client)
     name = client.recv(BUFSIZ)
-    clients[client] = pickle.loads(name)
+    clientsPosition[count] = pickle.loads(name)
+    clientsAddress[client] = pickle.loads(name)
     num = str(count)
     num = bytes(num, "utf8")
     client.send(num)
     count = count + 1
     while True:
         msg = client.recv(BUFSIZ)
-        if msg == bytes("spawnFood", "utf8"):
-            spawnFood()
-        elif msg != bytes("q", "utf8"):
-            clients[clients] = msg
-            broadcast(hash(tuple(clients)))
+        if msg != bytes("q", "utf8"):
+            msg = pickle.loads(msg)
+            # print(msg.values())
+            clientsPosition[strClient] = msg
+            broadcastall(pickle.dumps(clientsPosition))
         else:
             client.send(bytes("q", "utf8"))
             client.close()
-            del clients[client]
+            del clientsPosition[strClient]
+            del clientsAddress [client]
             broadcast(bytes("someone has left the chat.","utf8"))
             break
 
-def spawnFood():
-    foodX = random.randrange(foodSize, windowWidth-foodSize)
-    foodY = random.randrange(foodSize, windowHeight-foodSize)
-    food = str(foodX) + " " + str(foodY)
-    food = bytes(food, "utf8")
-    broadcast(food)
+
+def broadcastall(msg):
+    for sock in clientsAddress:
+        sock.sendall(msg)
 
 def broadcast(msg):  # prefix is for name identification.
 
-    for sock in clients:
+    for sock in clientsAddress:
         sock.send(msg)
 
-clients = {}
+clientsAddress = {}
+clientsPosition = {}
 addresses = {}
 count  = 0
 
 HOST = ''
-PORT = 33000
+PORT = 35000
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 windowWidth, windowHeight = (750, 450)
