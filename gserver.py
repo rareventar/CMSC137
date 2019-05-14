@@ -5,6 +5,7 @@ import random
 import json
 import time
 import random
+from collections import deque
 
 
 
@@ -31,6 +32,8 @@ def foodSpawn():
 def handle_client(client):  # Takes client socket as argument.
     global count
     global foodSpawnQueue
+    global clientsAddress
+    global clientsPosition
     # print(client)
     strClient = str(client)
     name = client.recv(BUFSIZ)
@@ -42,33 +45,55 @@ def handle_client(client):  # Takes client socket as argument.
     count = count + 1
     while True:
         msg = client.recv(BUFSIZ)
-        if msg != bytes("q", "utf8"):
-            print(msg)
-            msg = pickle.loads(msg)
-            # print(msg[3])
+        msg = pickle.loads(msg)
+
+        if msg[0] == "0":
             foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
-            msg[3] = foodSpawnQueuePacket
-            clientsAddress[client] = msg
+            msg[4] = foodSpawnQueuePacket
+            msg.pop(0)
+            x = deque(msg)
+            x.popleft()
+            y = list(x)
+            # print(y)
+
+            clientsAddress[client] = y
             temp = 0
             for a in clientsAddress:
                 clientsPosition[temp] = clientsAddress[a]
+                # print(clientsPosition[temp])
+                temp+=1
+            broadcastall(pickle.dumps(clientsPosition))
+        elif msg[0] == "1":
+            # thing  = pickle.loads(msg[1])
+            # print(thing)
+            foodSpawnQueue.remove(msg[1])
+        elif msg[0] == "2":
+            foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
+            msg[3] = foodSpawnQueuePacket
+
+            clientsAddress[client] = y
+            temp = 0
+            for a in clientsAddress:
+                clientsPosition[temp] = clientsAddress[a]
+                # print(clientsPosition[temp])
                 temp+=1
             broadcastall(pickle.dumps(clientsPosition))
         else:
             client.send(bytes("q", "utf8"))
             client.close()
-            del clientsPosition[strClient]
+            # del clientsPosition[strClient]
             del clientsAddress [client]
             broadcast(bytes("someone has left the chat.","utf8"))
             break
 
 
 def broadcastall(msg):
+    global clientsAddress
     for sock in clientsAddress:
         sock.sendall(msg)
 
 def broadcast(msg):  # prefix is for name identification.
-
+    global clientsAddress
     for sock in clientsAddress:
         sock.send(msg)
 
