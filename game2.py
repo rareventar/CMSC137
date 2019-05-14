@@ -58,22 +58,29 @@ def spawnFood():
         foodSpawnQueue.append([foodX, foodY, foodSize, foodSize])
         #window.blit(food, [foodX, foodY, foodSize, foodSize])
         #pygame.display.update()
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1,2))
 
 def send():  # event is passed by binders.
     """Handles sending of messages."""
     # msg = my_msg.get()
     # name = input("name: ")
     # client_socket.send(bytes(name, "utf8"))
-
+    
     pygame.init()
     maxSnakeLength = 1
     gray = (30, 30, 30)
+    green = (0,200,0)
+    white = (255,255,255)
+    black = (0,0,0)
 
     x = windowWidth * 0.5
     y = windowHeight * 0.5
     snakeBody = deque()
     snakeList = pickle.dumps(snakeBody)
+    smallFont = pygame.font.SysFont("arial", 25)
+    medFont = pygame.font.SysFont("arial", 50)
+    largeFont = pygame.font.SysFont("arial", 80)
+
 
     radius = 10
     connection = True
@@ -81,7 +88,21 @@ def send():  # event is passed by binders.
     window = pygame.display.set_mode((windowWidth, windowHeight))
 
     clock = pygame.time.Clock()
+    
+    def text_objects(text, color, size):
+        if size == "small":
+            text_surface = smallFont.render(text, True, color)
+        elif size == "medium":
+            text_surface = medFont.render(text, True, color)
+        elif size == "large":
+            text_surface = largeFont.render(text, True, color)
+        return text_surface, text_surface.get_rect()
 
+    def screenText(msg, color, y_displace=0, size="small"):
+        text_surf, text_rect = text_objects(msg, color, size)
+        text_rect.center = (windowWidth / 2), (windowHeight / 2) + y_displace
+        window.blit(text_surf, text_rect)
+    
     snakehead = pygame.image.load('Slither_snakehead.png')
     snakehead = pygame.transform.scale(snakehead, (40,40))
     food = pygame.image.load('food.png')
@@ -97,8 +118,34 @@ def send():  # event is passed by binders.
     receive_thread = Thread(target=receive)
     receive_thread.start()
 
+    def introloop():
+        intro = True
+        while intro:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
 
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p:
+                        print("Pressed P ", intro)
+                        intro = False
+                        print(intro)
+                    if event.key == pygame.K_q:
+                        pygame.quit()
+                        quit()
+            window.fill(white)
+            screenText("Welcome to Slither", green, -100, "large")
+            screenText("The objective of the game is to the blue orbs",black, -30)
+            screenText("The more apples you eat, the longer you get", black,10)
+            screenText("If you run into other snakes or the edges, you die!",black, 50)
+            screenText("Press P to play or Q to quit.", black,180)
+            pygame.display.update()
+        return False
+    intro = True
     while connection:
+        if intro:
+            intro = introloop()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
@@ -108,23 +155,23 @@ def send():  # event is passed by binders.
         else:
             boosted = False
         x, y = translate(x, y, (mousex, mousey), boosted)
-        if x > windowWidth:
-            x = windowWidth - 10
-        if x < 0:
-            x = 10
-        if y > windowHeight:
-            y = windowHeight - 10
-        if y < 0:
-            y = 10
+        if x > windowWidth-10:
+            pygame.quit()
+        if x < 10:
+            pygame.quit()
+        if y > windowHeight-10:
+            pygame.quit()
+        if y < 10:
+            pygame.quit()
 
         window.fill(gray)
         rotimage, rect = rotate(x, y, (mousex, mousey), snakehead)
         window.blit(rotimage, rect)
-
+        
         if len(foodSpawnQueue) != 0:
             for foodItem in foodSpawnQueue:
                 window.blit(food, foodItem)
-
+        
         #check if snake collided with food
         ate = False
         for foodItem in foodSpawnQueue:
@@ -141,7 +188,7 @@ def send():  # event is passed by binders.
         else:
             dummy = snakeBody.pop()
             snakeBody.appendleft((x,y))
-
+        
         for center in snakeBody:
             pygame.draw.circle(window, (30,200,30), [round(center[0]), round(center[1])], radius)
         window.blit(rotimage, rect)
@@ -155,7 +202,7 @@ def send():  # event is passed by binders.
         data = pickle.dumps(data)
         client_socket.send(bytes(data))
 
-    gameloop()
+    #    gameloop()
     pygame.quit()
 
 HOST = input('Enter host: ')

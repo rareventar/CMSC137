@@ -75,7 +75,7 @@ def translate(x, y, mousePos, boosted):
     return newX, newY
 
 def gameloop():
-    intro = True    
+    intro = True
     green = (0,200,0)
     white = (255,255,255)
     black = (0,0,0)

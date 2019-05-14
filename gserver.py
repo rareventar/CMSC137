@@ -4,6 +4,7 @@ import pickle
 import random
 import json
 
+
 def accept_incoming_connections():
     while True:
         client, client_address = SERVER.accept()
