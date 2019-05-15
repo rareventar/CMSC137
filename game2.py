@@ -8,7 +8,7 @@ from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 from collections import deque
 from client import createChatClient
-import multiprocessing 
+import multiprocessing
 def receive():
     global foodSpawnQueue
     global clients
@@ -236,7 +236,7 @@ if not PORT:
 else:
     PORT = int(PORT)
 
-BUFSIZ = 8192
+BUFSIZ = 32768
 ADDR = (HOST, PORT)
 alive = True
 foodSpawnQueue = []
@@ -251,4 +251,4 @@ client_socket.connect(ADDR)
 send_thread = Thread(target = send)
 send_thread.start()
 #multiprocessing.Process(target = createChatClient(HOST, PORT+2000)).start()
-Thread(target = createChatClient(HOST, PORT+2000)).start()
+# Thread(target = createChatClient(HOST, PORT+2000)).start()

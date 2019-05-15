@@ -18,7 +18,7 @@ def accept_incoming_connections():
 def handle_client(client):  # Takes client socket as argument.
     global clients
     """Handles a single client connection."""
-    BUFSIZ = 1024
+    BUFSIZ = 32768
 
     name = client.recv(BUFSIZ).decode("utf8")
     name = name.strip()
@@ -49,9 +49,9 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
 
 def createChatServer(HOST, PORT):
     global SERVER
-    BUFSIZ = 1024
-    ADDR = ('localhost', PORT)
-    
+    BUFSIZ = 32768
+    ADDR = (HOST, PORT)
+
     SERVER = socket(AF_INET, SOCK_STREAM)
     SERVER.bind(ADDR)
     SERVER.listen(5)

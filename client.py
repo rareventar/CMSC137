@@ -7,13 +7,13 @@ client_socket = None
 top = None
 def receive():
     global top, client_socket
-    BUFSIZ = 1024
+    BUFSIZ = 32768
 
     """Handles receiving of messages."""
     while True:
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
-            
+
             top.displayTextBox.configure(state="normal")
             top.displayTextBox.insert(tk.END, msg)
             top.displayTextBox.configure(state="disabled")
@@ -40,10 +40,10 @@ def send():  # event is passed by binders.
         top.quit()
 
 
-def sendThreadFunc():    
+def sendThreadFunc():
     send_thread = Thread(target = send)
     send_thread.start()
-def enterPressed(keypressed):    
+def enterPressed(keypressed):
     send_thread = Thread(target = send)
     send_thread.start()
 '''
@@ -55,8 +55,8 @@ def createChatClient(HOST,PORT):
     color = '#d9d9d9'  # X11 color: 'gray85'
     _fgcolor = '#000000'  # X11 color: 'black'
     _compcolor = '#d9d9d9' # X11 color: 'gray85'
-    _ana1color = '#d9d9d9' # X11 color: 'gray85' 
-    _ana2color = '#ececec' # Closest X11 color: 'gray92' 
+    _ana1color = '#d9d9d9' # X11 color: 'gray85'
+    _ana2color = '#ececec' # Closest X11 color: 'gray92'
 
     top.geometry("388x433+461+125")
     top.title("Chat")
@@ -118,7 +118,7 @@ def createChatClient(HOST,PORT):
 
     #----Now comes the sockets part----
 
-    BUFSIZ = 1024
+    BUFSIZ = 32768
     ADDR = (HOST, PORT)
 
     client_socket = socket(AF_INET, SOCK_STREAM)

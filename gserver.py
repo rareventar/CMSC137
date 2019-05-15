@@ -108,8 +108,8 @@ addresses = {}
 count  = 0
 
 HOST = ''
-PORT = 52000
-BUFSIZ = 8192
+PORT = 53000
+BUFSIZ = 32768
 ADDR = (HOST, PORT)
 Thread(target = cserverThread).start()
 print("ASDDDD")
@@ -125,8 +125,6 @@ print(1233122)
 SERVER.listen(5)
 print("Game Waiting for connection...")
 ACCEPT_THREAD = Thread(target=accept_incoming_connections)
-food_something = Thread(target=foodSpawn)
-food_something.start()
 ACCEPT_THREAD.start()
 print('game thread start')
 ACCEPT_THREAD.join()
