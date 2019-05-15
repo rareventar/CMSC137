@@ -16,14 +16,11 @@ def receive():
     while True:
         try:
             msg = client_socket.recv(BUFSIZ)
-            # msg_list.insert(tkinter.END, msg)
             clients.clear()
             msg  = pickle.loads(msg)
             clients = msg.copy()
-            # print(pickle.loads(msg))
-            # for a in clients:
-            # msg = pickle.loads(msg)
-            foodSpawnQueue = pickle.loads(msg[count][3])
+            fqueue = pickle.loads(msg[count][3])
+            foodSpawnQueue = fqueue
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -50,21 +47,9 @@ def translate(x, y, mousePos, boosted):
     newY = y + (speed * math.sin(angle))
     return newX, newY
 
-# def spawnFood():
-#     while alive:
-#         foodX = random.randrange(foodSize, windowWidth-foodSize)
-#         foodY = random.randrange(foodSize, windowHeight-foodSize)
-#         foodSpawnQueue.append([foodX, foodY, foodSize, foodSize])
-#         #window.blit(food, [foodX, foodY, foodSize, foodSize])
-#         #pygame.display.update()
-#         time.sleep(random.randint(1,5))
-
 def send():  # event is passed by binders.
-    """Handles sending of messages."""
-    # msg = my_msg.get()
-    # name = input("name: ")
-    # client_socket.send(bytes(name, "utf8"))
     global clients
+    global snakeBody
     pygame.init()
     maxSnakeLength = 1
     gray = (30, 30, 30)
@@ -72,9 +57,8 @@ def send():  # event is passed by binders.
     white = (255,255,255)
     black = (0,0,0)
 
-    x = windowWidth * 0.75
-    y = windowHeight * 0.75
-    snakeBody = deque()
+    x = windowWidth * 0.5
+    y = windowHeight * 0.5
     snakeList = pickle.dumps(snakeBody)
     smallFont = pygame.font.SysFont("arial", 25)
     medFont = pygame.font.SysFont("arial", 50)
@@ -203,20 +187,24 @@ def send():  # event is passed by binders.
             if rect.colliderect(foodItem):
                 ate = True
                 eaten = foodItem
+                # print("before: " + str(len(snakeBody)))
                 maxSnakeLength += 20
         #remove/eat food
         if ate:
             foodSpawnQueue.remove(eaten)
             # eaten = pickle.dumps(eaten)
+            # print(eaten)
             data = ["1", eaten]
             data = pickle.dumps(data)
             client_socket.send(bytes(data))
+            # print(len(snakeBody))
 
         if len(snakeBody) < maxSnakeLength:
             snakeBody.appendleft((x,y))
         else:
             dummy = snakeBody.pop()
             snakeBody.appendleft((x,y))
+        # print(snakeBody)
         localClients = clients.copy()
         for player in localClients:
             # print(localClients[player][2])
@@ -225,9 +213,10 @@ def send():  # event is passed by binders.
             else:
                 body = pickle.loads(localClients[player][2])
             for points in body:
-                pygame.draw.circle(window,(30,200,30), [round(localClients[player][0]), round(localClients[player][1])], radius)
-        #for center in snakeBody:
-        #    pygame.draw.circle(window, (30,200,30), [round(center[0]), round(center[1])], radius)
+                pygame.draw.circle(window,(30,200,30), [round(points[0]), round(points[1])], radius)
+                # print(points)
+                # rect = snakehead.get_rect(center=(points[0], points[1]))
+                # window.blit(snakehead,rect)
         window.blit(rotimage, rect)
         pygame.display.update()
         clock.tick(60)
@@ -247,7 +236,7 @@ if not PORT:
 else:
     PORT = int(PORT)
 
-BUFSIZ = 1024
+BUFSIZ = 8192
 ADDR = (HOST, PORT)
 alive = True
 foodSpawnQueue = []
@@ -255,7 +244,7 @@ foodSize = 30
 count = 0
 clients = {}
 windowWidth, windowHeight = (750, 450)
-
+snakeBody = deque()
 client_socket = socket(AF_INET, SOCK_STREAM)
 client_socket.connect(ADDR)
 

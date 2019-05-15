@@ -43,6 +43,8 @@ def handle_client(client):  # Takes client socket as argument.
     num = bytes(num, "utf8")
     client.send(num)
     count = count + 1
+    food_something = Thread(target=foodSpawn)
+    food_something.start()
     while True:
         msg = client.recv(BUFSIZ)
         msg = pickle.loads(msg)
@@ -54,7 +56,7 @@ def handle_client(client):  # Takes client socket as argument.
             x.popleft()
             y = list(x)
             # print(msg)
-
+            # print(pickle.loads(y[2]))
             clientsAddress[client] = y
             temp = 0
             for a in clientsAddress:
@@ -64,13 +66,12 @@ def handle_client(client):  # Takes client socket as argument.
             broadcastall(pickle.dumps(clientsPosition))
         elif msg[0] == "1":
             # thing  = pickle.loads(msg[1])
-            # print(thing)
-            foodSpawnQueue.remove(msg[1])
+            if msg[1] in foodSpawnQueue:
+                foodSpawnQueue.remove(msg[1])
         elif msg[0] == "2":
             foodSpawnQueuePacket = pickle.dumps(foodSpawnQueue)
             msg[3] = foodSpawnQueuePacket
-
-            clientsAddress[client] = y
+            clientsAddress[client] = msg
             temp = 0
             for a in clientsAddress:
                 clientsPosition[temp] = clientsAddress[a]
@@ -107,8 +108,8 @@ addresses = {}
 count  = 0
 
 HOST = ''
-PORT = 35000
-BUFSIZ = 1024
+PORT = 52000
+BUFSIZ = 8192
 ADDR = (HOST, PORT)
 Thread(target = cserverThread).start()
 print("ASDDDD")
