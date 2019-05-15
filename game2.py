@@ -117,7 +117,31 @@ def send():  # event is passed by binders.
     # threading.Thread(target=spawnFood, daemon=True).start()
     receive_thread = Thread(target=receive)
     receive_thread.start()
+    def instructions():
+        inst = True
+        window.fill(white)
+        screenText("Instruction", black, -100, "large")
+        screenText("The objective of the game is to eat the blue orbs.",black, -30)
+        screenText("Your snake follows the mouse.", black,10)
+        screenText("If you run into the edges, you die!",black, 50)
+        screenText("Press B to go back or Q to quit.", black,180)
+        pygame.display.update()
 
+        while inst:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.QUIT()
+                    quit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_b:
+                        inst = False
+
+                    elif event.key == pygame.K_q:
+                        pygame.quit()
+                        quit()
+        introloop()
+        clock.tick(5)
     def introloop():
         intro = True
         while intro:
@@ -127,17 +151,19 @@ def send():  # event is passed by binders.
                     quit()
 
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_i:
+                        instructions()
                     if event.key == pygame.K_p:
                         intro = False
                     if event.key == pygame.K_q:
                         pygame.quit()
                         quit()
             window.fill(white)
-            screenText("Welcome to Slither", green, -100, "large")
-            screenText("The objective of the game is to the blue orbs",black, -30)
-            screenText("The more apples you eat, the longer you get", black,10)
-            screenText("If you run into other snakes or the edges, you die!",black, 50)
-            screenText("Press P to play or Q to quit.", black,180)
+            screenText("Welcome to Slither!", green, -100, "large")
+            #screenText("The objective of the game is to the blue orbs",black, -30)
+            #screenText("The more apples you eat, the longer you get", black,10)
+            #screenText("If you run into other snakes or the edges, you die!",black, 50)
+            screenText("Press P to play, I for instructions or Q to quit.", black,10)
             pygame.display.update()
         return False
     intro = True

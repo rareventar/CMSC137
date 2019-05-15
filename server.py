@@ -22,7 +22,7 @@ def handle_client(client):  # Takes client socket as argument.
 
     name = client.recv(BUFSIZ).decode("utf8")
     name = name.strip()
-    welcome = 'Welcome %s! If you ever want to quit, type q to exit. \n' % name
+    welcome = 'Welcome %s! If you ever want to quit\n' % name
     client.send(bytes(welcome, "utf8"))
     msg = "%s has joined the chat!\n" % name
     broadcast(bytes(msg, "utf8"))
